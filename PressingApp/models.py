@@ -107,7 +107,7 @@ class Article(models.Model):
 class Pack_Article(models.Model):
     poids = models.PositiveIntegerField()
 
-
+    
 
 class Service(models.Model):
     Types = (
