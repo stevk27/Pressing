@@ -27,7 +27,7 @@ class TypeClient(models.Model):
 
 
 class Client(models.Model):
-    user = models.OneToOneField(User, on_delete = models.CASCADE)
+    user = models.OneToOneField(User, on_delete = models.CASCADE, null = True)
     prenom  = models.CharField(max_length = 100, null = True, blank = True)
     telephone = models.CharField(max_length = 100, null = True, blank = True)
     #adresse_client = models.ManyToManyField(AdresseClient, null = True , blank = True)
@@ -52,6 +52,9 @@ class AdressePretataire(models.Model):
    
     def __str__(self):
         return self.ville
+    
+    def distance(self):
+        pass
 
 
 
@@ -107,7 +110,7 @@ class Article(models.Model):
 class Pack_Article(models.Model):
     poids = models.PositiveIntegerField()
 
-    
+
 
 class Service(models.Model):
     Types = (
@@ -133,10 +136,13 @@ class Note(models.Model):
     commentaire =  models.TextField(max_length = 300, null = True, blank = True)
 
 
+
 class Tarification(models.Model):
     article = models.ForeignKey(Article, on_delete = models.CASCADE, null = True, blank = True)
     prix = models.PositiveIntegerField()
     service = models.ForeignKey(Service, on_delete = models.CASCADE, null = True, blank = True)
+
+
 
 class Prix_Pack(models.Model):
     prix = models.PositiveIntegerField()

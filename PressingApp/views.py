@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login , authenticate, logout
 from .forms import *
+from django.db.models import Q
 # Gestion des API
 
 
@@ -38,6 +39,8 @@ from rest_framework.generics import GenericAPIView
 def home(request):
 
     return render(request,'home.html')
+
+# INTERFACE CLIENT #
 
 
 def register(request):
@@ -100,29 +103,84 @@ def loginClient(request):
 
 
 
+# Gestion de la recherche
+
+def search(request):
+    if request.method == "GET":
+        query = request.GET.get('q')#on recupere la valeur de q
+
+        
+
+        if query is not None:
+            lookup = Q(adresse__ville__icontains = query)|Q(adresse__quartier__icontains = query)|Q(service__nom_service__icontains = query)|Q(enseigne_juridique__icontains = query)
+            result = Prestataire_Service.objects.filter(lookup).distinct() 
+            context ={
+                'results':result,
+                }
+            return render(request, 'prestataire/search.html', context )
+        else:
+            return render(request,'prestataire/search.html')
+    else:
+        return render(request,'prestataire/home.html')
+
+
+## GESTION DES COMMANDES CLIENTS ##
+
+def cart(request):
+    pass
+
+def checklist(request):
+    pass
+
+def procesOrder(request):
+    pass
+
+## GESTIONS DESARTICLES  ##
+def tarifArticle(request):
+    pass
+
+def tarifPachArticle(request):
+    pass
+
+
+
 # GESTION DES API MOBIL
 
 class AuthentificationViewSet(viewsets.ViewSet):
+    serializer_class = ClientSerializers
 
-    def create(self,request):
-        user = UserSerializer(data = request.data)
-        client = ClientSerializers(data = request.data)
-        type_client = TypeClientSerializer(data = request.data)
+    def get_queryset(self):
+        client = Client.objects.all()
+        return client
 
-        data = {}
+    def create(self, request, *args, **kwargs):
+        data_user = request.data
 
-        if user.is_valid() and client.is_valid() and type_client.is_valid():
-            user.save()
-            type_client.save()
-            client = client.save(commit = False) 
-            client.user = user
-            client.typeclient = type_client
-            client.save()
-            return Response(client.data, status = status.HTTP_201_CREATED)
-        client = ClientSerializers()
-        print(client.errors)
-        return Response('errors', status = status.BAD_REQUEST)
+        newuser = User.objects.create(
+            username = data_user["username"],
+            first_name = data_user["first_name"],
+            email = data_user["email"],
+            password = data_user["password"]
+            
+        )
+    
+        newuser.save()
 
+        
+        newclient = Client.objects.create(
+            user = newuser,
+            prenom = data_user["prenom"], 
+            telephone = data_user["telephone"],
+            typeclient = TypeClient.objects.get(id = data_user["typeclient"])
+         )
+        newclient.save()
+
+        serializer = ClientSerializers(newclient)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+       
+
+    
     def list(self,request):
         clients = Client.objects.all()
         serializer = ClientSerializers(clients, many = True)
@@ -133,6 +191,7 @@ class AuthentificationViewSet(viewsets.ViewSet):
 
 class RegisterView(GenericAPIView):
     serializer_class = UserSerializer
+    query = Client.objects.all()
 
     def post(self, request):
         serializer = UserSerializer(data=request.data)
@@ -188,7 +247,35 @@ class AdresseClientView(GenericAPIView):
     query = AdresseClient.objects.all()
 
     def post(self, request):
-        pass
+        serializer = AdresseSerializer(data = request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class TypeClientView(GenericAPIView):
+
+    serializer_class = TypeClientSerializer
+
+    query = TypeClient.objects.all()
+
+    def post(self,request):
+        serializer = TypeClientSerializer(data = request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+## API DE LA RECHERCHE ##
+
+class SearchView(GenericAPIView):
+    pass
 

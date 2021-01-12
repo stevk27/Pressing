@@ -25,7 +25,7 @@ SECRET_KEY = '#pv7v-2a3^%o&na4zdmuzv*y(b3(ga27a&x@7o9u46@usr=p!a'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -141,6 +141,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
+        
     ]
 }
 
