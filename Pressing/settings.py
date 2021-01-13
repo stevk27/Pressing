@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'PressingApp',
     'rest_framework',
     'rest_framework.authtoken',
+    'djoser',
 
 ]
 
@@ -84,6 +85,21 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
+# AUTH_USER_MODEL = 'PressingApp.Users'
+
+# Djoser = {
+#     'LOGIN_FIELD': 'username',
+#     'USER_CREATE_PASSWORD_RETYPE' : True,
+#     'SERIALZERS': {
+#         'user_create':'authentifiacation.serializers'
+#     }
+
+# }
+
+# JWT
+JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
+
 
 
 # Password validation
@@ -141,11 +157,17 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-        
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+
     ]
 }
 
-
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': [
+#         'rest_framework_simplejwt.authentication.JWTAuthentication',
+#      ],
+# }
 
 #gestion des Email
 

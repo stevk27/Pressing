@@ -2,19 +2,27 @@ from rest_framework import serializers
 from .models import *
 from django.contrib.auth.models import User
 
+# from djoser.serializers import UserCreateSerializer,UserSerializer
+#####
+
+# class UserCreateSerializer(UserCreateSerializer):
+#     class Meta(UserCreateSerializer.Meta):
+#         models = Users
+#         fields = ('id', 'username','fist_name','last_name','email','phone','type','password')
+
+
+
 ##GESTION DU SERIALISEUR CLIENT##
 
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(
-        max_length=65, min_length=8, write_only=True)
-
+    password = serializers.CharField(max_length=65, min_length=8, write_only=True)
     email = serializers.EmailField(max_length=255, min_length=4),
     first_name = serializers.CharField(max_length=255, min_length=2)
-    # last_name = serializers.CharField(max_length=255, min_length=2)
+    last_name = serializers.CharField(max_length=255, min_length=2)
 
     class Meta:
         model = User
-        fields = ['id','username','first_name','email', 'password']
+        fields = ['id','username','first_name','last_name','email', 'password']
 
     def validate(self, attrs):
         email = attrs.get('email', '')

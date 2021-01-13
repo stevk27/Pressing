@@ -1,8 +1,25 @@
 from django.db import models
+# from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import User
 # Create your models here.
 
+# User Abstract
 
+# class Users(AbstractUser):
+#     Choix = (
+#         ('entreprise', 'entreprise'),
+#         ('personne','personne'),
+#     )
+#     email = models.EmailField(verbose_name = 'email', max_length = 255, unique = True)
+#     phone = models.CharField(max_length = 10, null = True, blank = True)
+#     typesUser = models.CharField(max_length = 100, null = True, blank = True, choices = Choix)
+#     REQUIRED_FIELDS = [
+#         'username','first_name','last_name','email','phone','types'
+#     ]
+#     USERNAME_FIELDS = 'username'
+    
+#     def get_username(self):
+#         return self.username
 
 # client 
 
@@ -19,7 +36,13 @@ class AdresseClient(models.Model):
 
 
 class TypeClient(models.Model):
-    nom_type = models.CharField(max_length = 100,blank = True)
+
+    Choix = (
+        ('entreprise','entreprise'),
+        ('personne','personne'),
+    )
+
+    nom_type = models.CharField(max_length = 100,blank = True, null = True, choices =  Choix)
     caracteristique = models.TextField(max_length = 200, blank = True)
 
     def __str__(self):

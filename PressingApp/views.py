@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login , authenticate, logout
 from .forms import *
 from django.db.models import Q
+from django.contrib.auth.hashers import make_password
 # Gestion des API
 
 
@@ -157,16 +158,13 @@ class AuthentificationViewSet(viewsets.ViewSet):
         data_user = request.data
 
         newuser = User.objects.create(
-            username = data_user["username"],
+            username = data_user ["username"],
             first_name = data_user["first_name"],
             email = data_user["email"],
-            password = data_user["password"]
-            
+            password = make_password(data_user["password"]),
+           
         )
-    
         newuser.save()
-
-        
         newclient = Client.objects.create(
             user = newuser,
             prenom = data_user["prenom"], 
@@ -189,17 +187,17 @@ class AuthentificationViewSet(viewsets.ViewSet):
 
 #GENERIC VIEW API 
 
-class RegisterView(GenericAPIView):
-    serializer_class = UserSerializer
-    query = Client.objects.all()
+# class RegisterView(GenericAPIView):
+#     serializer_class = UserSerializer
+#     query = Client.objects.all()
 
-    def post(self, request):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+#     def post(self, request):
+#         serializer = UserSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(GenericAPIView):
@@ -207,13 +205,15 @@ class LoginView(GenericAPIView):
 
     def post(self, request):
         data = request.data
-        username = data.get('username', '')
+        username = data.get('username',)
         password = data.get('password', '')
         user = auth.authenticate(username=username, password=password)
-
-        if user:
+        print(username)
+        print(password)
+        if user is not None:
+            print("hello")
             auth_token = jwt.encode(
-                {'username': user.username}, settings.JWT_SECRET_KEY)
+                {'username': user.username}, settings.SECRET_KEY)
 
             serializer = UserSerializer(user)
 

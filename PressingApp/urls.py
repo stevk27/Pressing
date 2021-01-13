@@ -17,8 +17,12 @@ urlpatterns = [
 
     #url des API
     path('viewset/', include(router.urls)),
-    path('register', RegisterView.as_view()),
+    # path('register', RegisterView.as_view()),
     path('login', LoginView.as_view()),
+
+    #use the djoser
+    path('', include('djoser.urls')),
+    path('', include('djoser.urls.authtoken')),
 
     path('adresseclient', AdresseClientView.as_view() ),
     path('typeclient', TypeClientView.as_view() ),
