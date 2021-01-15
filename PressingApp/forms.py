@@ -27,8 +27,8 @@ class AdresseForm(ModelForm):
         fields = ['ville','quartier','description','longitude','latitude']
 
 
-class TypeClientForm(ModelForm):
+# class TypeClientForm(ModelForm):
 
-    class Meta:
-        model = TypeClient
-        fields = ['nom_type','caracteristique']
+#     class Meta:
+#         model = TypeClient
+#         fields = ['nom_type','caracteristique']

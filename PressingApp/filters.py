@@ -3,11 +3,10 @@ from django_filters import CharFilter
 from .models import *
 
 
-class PrestataireFilter(django_filters.FilterSet):
-    nom_universite = CharFilter(field_name = "nom",lookup_expr = "icontains" )
-    #ville_universite = CharFilter(field_name = "ville", lookup_expr = "icontains")
+# class PrestataireFilter(django_filters.FilterSet):
+#     # nom_universite = CharFilter(field_name = "nom",lookup_expr = "icontains" )
     
-    class Meta:
-        model = Prestataire_Service()
-        fields = ['enseigne_juridique','adresse','service']
-        # exclude = ['adresse','cp','effectifs']
+#     class Meta:
+#         model = Prestataire()
+#         fields = ['enseigne_juridique','adresse','service']
+#         # exclude = ['adresse','cp','effectifs']

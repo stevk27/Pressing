@@ -53,11 +53,11 @@ class AdresseSerializer(serializers.ModelSerializer):
 
 
 
-class TypeClientSerializer(serializers.ModelSerializer):
+# class TypeClientSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = TypeClient
-        fields = ['id','nom_type','caracteristique']
+#     class Meta:
+#         model = TypeClient
+#         fields = ['nom_type','caracteristique']
 
 
 
@@ -66,7 +66,7 @@ class ClientSerializers(serializers.ModelSerializer):
    
     class Meta:
         model = Client
-        fields = ['id','user','prenom','telephone','typeclient']
+        fields = ['user','prenom','telephone','type_client']
         depth = 1
 
 
@@ -94,37 +94,58 @@ class CategorieArticleSerializer(serializers.ModelSerializer):
 
 class ArticleSerializer(serializers.ModelSerializer):
     
-    type_article = TypeArticleSerializer(many = False)
-    categorie_article = CategorieArticleSerializer(many = False)
-
     class Meta:
         model = Article
-        fields = ['couleur','taille','marque','description','cartegorieArticle','type_article']
-
+        fields = ('__all__')
+        depth =1
 
 ## SERVICE SERIALIZER ##
 class ServiceSerializer(serializers.ModelSerializer):
 
-
-
     class Meta:
         model = Service
         fields = ['nom_service','caracteristique','article','pack_article']
+        depth = 1
 
 
-class PrestataireSerializer(serializers.ModelSerializer):
-
-
-    class Meta:
-        model = Prestataire_Service
-        fields = ['enseigne_juridique','numero_imatriculation','telephone','adresse','service','user']
+# class PrestataireSerializer(serializers.ModelSerializer):
+    
+#     class Meta:
+#         model = Prestataire
+#         fields = ['enseigne_juridique','numero_imatriculation','telephone','adresse','service','user']
+#         depth = 1
 
 
 
 ## GESTION COMMANDE ##
 
 class CommandeSerializer(serializers.ModelSerializer):
-    
+    # client = serializers.PrimaryKeyRelatedField(allow_null = True, queryset = Client.objects.all(), required = False)
+    # prestataire = serializers.PrimaryKeyRelatedField(many = True, read_only = True)
+
     class Meta:
         model = Commande
-        fiedls = []
+        fields = ['client','date_commande','mode_paiement']
+    
+
+
+## GESTION DE LIGNE DE COMMANDE ##
+
+# class LigneCommandeSerializer(serializers.ModelSerializer):
+#     # commande = CommandeSerializer(read_only = True)
+#     # prestataire = PrestataireSerializer(read_only = True)
+
+#     class Meta:
+
+#         model = Ligne_commande
+#         fields = ['quantite','date_commande','commande']
+#         depth = 1
+    
+
+
+## GESTION DES FACTURES ##
+class FactureSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Facture
+        fields = ('__all__')

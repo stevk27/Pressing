@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect
 from .forms import *
 from .models import *
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login , authenticate, logout
@@ -23,6 +24,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework import mixins
+from rest_framework import filters
 
 #gestion des authentications avec les API
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication ,BasicAuthentication
@@ -48,20 +50,15 @@ def register(request):
     if request.method == "POST" :
         forms = CreateUserForm(request.POST)
         customers = ClientForm(request.POST)
-        type_client  =  TypeClientForm(request.POST)
-
-
+        
         if forms.is_valid() and customers.is_valid() and type_client.is_valid():
 
             print('welcome')
             user = forms.save()
             types = type_client.save()
             client = customers.save(commit = False)
-            types = type_client.save()
-
 
             client.user = user
-            client.type = types
     
             print(client.user)
 
@@ -101,12 +98,14 @@ def loginClient(request):
 
     return render(request, 'login.html')
 
+## GESTION DU PRESTATAIRE ##
+def prestataire(request):
+    return render(request,'prestataire.html')
 
 
+# Gestion de la recherche  Des Prestataires de service
 
-# Gestion de la recherche
-
-def search(request):
+def searche(request):
     if request.method == "GET":
         query = request.GET.get('q')#on recupere la valeur de q
 
@@ -156,28 +155,30 @@ class AuthentificationViewSet(viewsets.ViewSet):
 
     def create(self, request, *args, **kwargs):
         data_user = request.data
-
+        # if data_user:
         newuser = User.objects.create(
-            username = data_user ["username"],
+            username = data_user["username"],
             first_name = data_user["first_name"],
             email = data_user["email"],
             password = make_password(data_user["password"]),
-           
+        
         )
         newuser.save()
         newclient = Client.objects.create(
             user = newuser,
             prenom = data_user["prenom"], 
             telephone = data_user["telephone"],
-            typeclient = TypeClient.objects.get(id = data_user["typeclient"])
-         )
+            type_client = data_user["type_client"]
+        )
         newclient.save()
 
         serializer = ClientSerializers(newclient)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-       
+        # else:
+        #     return Response("username or Password is already exist")
 
+        
     
     def list(self,request):
         clients = Client.objects.all()
@@ -186,19 +187,6 @@ class AuthentificationViewSet(viewsets.ViewSet):
 
 
 #GENERIC VIEW API 
-
-# class RegisterView(GenericAPIView):
-#     serializer_class = UserSerializer
-#     query = Client.objects.all()
-
-#     def post(self, request):
-#         serializer = UserSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class LoginView(GenericAPIView):
     serializer_class = LoginSerializer
@@ -256,26 +244,117 @@ class AdresseClientView(GenericAPIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class TypeClientView(GenericAPIView):
+## PRESTATAIRE ##
 
-    serializer_class = TypeClientSerializer
+# class PrestataireView(generics.ListCreateAPIView):
+    # queryset = Prestataire.objects.all()
+    # serializer_class = PrestataireSerializer
+    
 
-    query = TypeClient.objects.all()
+# class SearchView(generics.ListCreateAPIView):
+#     search_fields = ['enseigne_juridique', 'adresse__ville','adresse__quartier','service__nom_service']
+#     filter_backends = (filters.SearchFilter,)
+#     queryset = Prestataire.objects.all()
+#     serializer_class = PrestataireSerializer
 
-    def post(self,request):
-        serializer = TypeClientSerializer(data = request.data)
-
-        if serializer.is_valid():
-            serializer.save()
-
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+## GESTIONS DES ARTICLES ##
+class ArticleViewSet(viewsets.ModelViewSet):
+    serializer_class = ArticleSerializer
+    queryset = Article.objects.all()
 
 
-## API DE LA RECHERCHE ##
 
-class SearchView(GenericAPIView):
-    pass
+## GESTIONS DES SERVICES ##
+
+class ServiceViewSet(viewsets.ModelViewSet):
+    serializer_class = ServiceSerializer
+
+    queryset = Service.objects.all()
+
+## GESTION DES COMMANDES ET LIGNE DE COMMANDE  ##
+# class LigneCommandeView(GenericAPIView):
+#     serializers_class = LigneCommandeSerializer
+
+#     def get_queryset(self):
+#         ligne_commande = Ligne_commande.objects.all()
+
+#         return ligne_commande
+
+    # def create(self, request,*args, **kwargs):
+    #     data_user = request.data
+    #     # if data_user:
+    #     newcommande = Commande.objects.create(
+    #         username = data_user["username"],
+    #         first_name = data_user["first_name"],
+    #         email = data_user["email"],
+    #         password = make_password(data_user["password"]),
+        
+    #     )
+    #     newcommande.save()
+    #     newclient = Client.objects.create(
+    #         user = newuser,
+    #         prenom = data_user["prenom"], 
+    #         telephone = data_user["telephone"],
+    #         type_client = data_user["type_client"]
+    #     )
+    #     newclient.save()
+
+    #     serializer = ClientSerializers(newclient)
+
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        
+# class LigneViewSet(viewsets.ModelViewSet):
+#     serializer_class = LigneCommandeSerializer
+#     queryset = Ligne_commande.objects.all()
+
+    # def post(self, request):
+
+    #     serializer = LigneCommandeSerializer(data=request.data)
+        
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CommandeViewSet(viewsets.ModelViewSet):
+    serializer_class = CommandeSerializer
+    queryset = Commande.objects.all()
+
+    # def post(self, request):
+    #     serializer =  CommandeSerializer()
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED )
+    #     else:
+    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # def get_queryset(self):
+    #     commande =  Commande.objects.all()
+    #     return commande
+    
+    # def create(self, request):
+    #     data_order = request.data
+
+    #     new_order = Commande.objects.create(
+    #         mode_paiement = data_order['mode_paiement'],
+    #         # status = data_order['status'],
+    #         # prestataire = data_order['prestataire'],
+    #         # client = data_order['client'],
+    #         )
+        
+    #     new_order.save()
+
+    #     for client in data_order['client']:
+    #         client_obj = Client.objects.get(prenom=client['prenom'])
+    #         new_order.client.add(client_obj)
+
+    #     for prestataire in data_order['prestataire']:
+    #         prestataire_obj = Prestataire_Service.objects.get(enseigne_juridique = prestataire['enseigne_juridique'])
+    #         new_order.prestataire.add(prestataire_obj)
+
+    #     serializer = CommandeSerializer(new_order)
+    #     return Response(serializer.data)
+
 
