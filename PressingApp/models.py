@@ -3,23 +3,6 @@ from django.db import models
 from django.contrib.auth.models import User
 # Create your models here.
 
-# User Abstract
-
-# class Users(AbstractUser):
-#     Choix = (
-#         ('entreprise', 'entreprise'),
-#         ('personne','personne'),
-#     )
-#     email = models.EmailField(verbose_name = 'email', max_length = 255, unique = True)
-#     phone = models.CharField(max_length = 10, null = True, blank = True)
-#     typesUser = models.CharField(max_length = 100, null = True, blank = True, choices = Choix)
-#     REQUIRED_FIELDS = [
-#         'username','first_name','last_name','email','phone','types'
-#     ]
-#     USERNAME_FIELDS = 'username'
-    
-#     def get_username(self):
-#         return self.username
 
 # client 
 
@@ -35,19 +18,6 @@ class AdresseClient(models.Model):
         return self.ville
 
 
-# class TypeClient(models.Model):
-
-#     Choix = (
-#         ('entreprise','entreprise'),
-#         ('personne','personne'),
-#     )
-
-#     nom_type = models.CharField(max_length = 100,blank = True, null = True, choices =  Choix)
-#     caracteristique = models.TextField(max_length = 200, blank = True)
-
-#     def __str__(self):
-#         return self.nom_type
-
 
 class Client(models.Model):
 
@@ -60,7 +30,7 @@ class Client(models.Model):
     type_client = models.CharField(max_length = 100,blank = True, null = True, choices =  Choix)
     prenom  = models.CharField(max_length = 100, null = True, blank = True)
     telephone = models.CharField(max_length = 100, null = True, blank = True)
-    
+    adresse =  models.ManyToManyField(AdresseClient)    
     def __str__(self):
 
         return self.prenom
@@ -150,7 +120,7 @@ class Service(models.Model):
 
     def __str__(self):
         return self.nom_service
-
+        
 
 
 class Note(models.Model):
@@ -201,16 +171,26 @@ class Logistique(models.Model):
         return self.ville
     
 
+class Prestataire_Service(models.Model):
+
+    Prestataire = (
+        ('blanchisseur','blanchisseur'),
+        ('pressing','pressing'),
+    )
+
+    user = models.OneToOneField(User , on_delete = models.CASCADE, null=True)
+    photo = models.ImageField()
+    enseigne_juridique = models.CharField(max_length = 100, null = True, blank = True)
+    numero_imatriculation = models.CharField(max_length = 100, null = True, blank = True)
+    telephone = models.CharField(max_length = 10, null = True , blank = True)
+    adresse = models.ForeignKey(AdressePretataire, on_delete = models.CASCADE)
+    service = models.ForeignKey(Service, on_delete = models.CASCADE)
+    logistique = models.ManyToManyField(Logistique,)
+    nom_categorie = models.CharField(max_length = 100, blank = True, choices = Prestataire)
+
+    def __str__(self):
+        return self.enseigne_juridique
     
-
-
-# class Mode_Paiement(models.Model):
-#     nom_mode = models.CharField(max_length = 100)
-#     caracteristique = models.TextField(max_length = 200)     
-
-#     def __str__(self):
-#         return self.nom_mode    
-
 
 class Commande(models.Model):
 
@@ -222,22 +202,17 @@ class Commande(models.Model):
     client = models.ForeignKey(Client, on_delete = models.CASCADE, null = True, blank = True)
     date_commande = models.DateTimeField(auto_now_add = True, null = True, blank = True )
     # status = models.BooleanField(default = False, blank = True )
-    # prestataire = models.ManyToManyField(Prestataire, through = 'Ligne_commande')
+    prestataire = models.ManyToManyField(Prestataire_Service, through = 'Ligne_commande')
     mode_paiement = models.CharField(max_length = 100, null = True, blank = True, choices = Mode)
 
 
-# class Ligne_commande(models.Model):
-#     quantite = models.PositiveIntegerField()
-#     date_commande = models.DateTimeField(auto_now_add = True, blank = True, null = True)
-#     commande = models.ForeignKey(Commande, on_delete = models.CASCADE, null = True, blank = True)
-    # prestataire = models.ForeignKey(Prestataire, on_delete = models.CASCADE , null = True , blank = True)
+class Ligne_commande(models.Model):
+    quantite = models.PositiveIntegerField()
+    date_commande = models.DateTimeField(auto_now_add = True, blank = True, null = True)
+    commande = models.ForeignKey(Commande, on_delete = models.CASCADE, null = True, blank = True)
+    prestataire = models.ForeignKey(Prestataire_Service, on_delete = models.CASCADE , null = True , blank = True)
     
 
-
-# class BonCommande(models.Model):
-#     numero_bon = models.CharField(max_length = 100, null = True, blank = True)
-#     commande = models.ForeignKey(Commande , on_delete = models.CASCADE)
-#     mode_paiement = models.ForeignKey(Mode_Paiement, on_delete = models.CASCADE)
 
 class Facture(models.Model):
     commande = models.ForeignKey(Commande, on_delete = models.CASCADE, null = True, blank = True)

@@ -1,5 +1,4 @@
 from django.shortcuts import render,redirect
-from .forms import *
 from .models import *
 
 from django.contrib import messages
@@ -37,13 +36,13 @@ from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
 from rest_framework.generics import GenericAPIView
 
-# Create your views here.
+# # Create your views here.
 
 def home(request):
 
     return render(request,'home.html')
 
-# INTERFACE CLIENT #
+# # INTERFACE CLIENT #
 
 
 def register(request):
@@ -55,7 +54,7 @@ def register(request):
 
             print('welcome')
             user = forms.save()
-            types = type_client.save()
+            # types = type_client.save()
             client = customers.save(commit = False)
 
             client.user = user
@@ -71,12 +70,12 @@ def register(request):
     else:
         forms = CreateUserForm()
         customers = ClientForm()
-        type_client  =  TypeClientForm()
+        # type_client  =  TypeClientForm()
         
     context = {
             'forms':forms,
             'customers': customers,
-            'types':type_client,
+            
             }
     return render(request, 'register.html', context)
 
@@ -246,16 +245,16 @@ class AdresseClientView(GenericAPIView):
 
 ## PRESTATAIRE ##
 
-# class PrestataireView(generics.ListCreateAPIView):
-    # queryset = Prestataire.objects.all()
-    # serializer_class = PrestataireSerializer
+class PrestataireView(generics.ListCreateAPIView):
+    queryset = Prestataire_Service.objects.all()
+    serializer_class = PrestataireSerializer
     
 
-# class SearchView(generics.ListCreateAPIView):
-#     search_fields = ['enseigne_juridique', 'adresse__ville','adresse__quartier','service__nom_service']
-#     filter_backends = (filters.SearchFilter,)
-#     queryset = Prestataire.objects.all()
-#     serializer_class = PrestataireSerializer
+class SearchView(generics.ListCreateAPIView):
+    search_fields = ['enseigne_juridique', 'adresse__ville','adresse__quartier','service__nom_service']
+    filter_backends = (filters.SearchFilter,)
+    queryset = Prestataire_Service.objects.all()
+    serializer_class = PrestataireSerializer
 
 ## GESTIONS DES ARTICLES ##
 class ArticleViewSet(viewsets.ModelViewSet):
@@ -272,13 +271,13 @@ class ServiceViewSet(viewsets.ModelViewSet):
     queryset = Service.objects.all()
 
 ## GESTION DES COMMANDES ET LIGNE DE COMMANDE  ##
-# class LigneCommandeView(GenericAPIView):
-#     serializers_class = LigneCommandeSerializer
+class LigneCommandeView(GenericAPIView):
+    serializers_class = LigneCommandeSerializer
 
-#     def get_queryset(self):
-#         ligne_commande = Ligne_commande.objects.all()
+    def get_queryset(self):
+        ligne_commande = Ligne_commande.objects.all()
 
-#         return ligne_commande
+        return ligne_commande
 
     # def create(self, request,*args, **kwargs):
     #     data_user = request.data
@@ -304,9 +303,9 @@ class ServiceViewSet(viewsets.ModelViewSet):
     #     return Response(serializer.data, status=status.HTTP_201_CREATED)
         
         
-# class LigneViewSet(viewsets.ModelViewSet):
-#     serializer_class = LigneCommandeSerializer
-#     queryset = Ligne_commande.objects.all()
+class LigneViewSet(viewsets.ModelViewSet):
+    serializer_class = LigneCommandeSerializer
+    queryset = Ligne_commande.objects.all()
 
     # def post(self, request):
 

@@ -108,12 +108,12 @@ class ServiceSerializer(serializers.ModelSerializer):
         depth = 1
 
 
-# class PrestataireSerializer(serializers.ModelSerializer):
+class PrestataireSerializer(serializers.ModelSerializer):
     
-#     class Meta:
-#         model = Prestataire
-#         fields = ['enseigne_juridique','numero_imatriculation','telephone','adresse','service','user']
-#         depth = 1
+    class Meta:
+        model = Prestataire_Service
+        fields = ['enseigne_juridique','numero_imatriculation','telephone','adresse','service','user']
+        depth = 1
 
 
 
@@ -131,15 +131,15 @@ class CommandeSerializer(serializers.ModelSerializer):
 
 ## GESTION DE LIGNE DE COMMANDE ##
 
-# class LigneCommandeSerializer(serializers.ModelSerializer):
-#     # commande = CommandeSerializer(read_only = True)
-#     # prestataire = PrestataireSerializer(read_only = True)
+class LigneCommandeSerializer(serializers.ModelSerializer):
+    # commande = CommandeSerializer(read_only = True)
+    # prestataire = PrestataireSerializer(read_only = True)
 
-#     class Meta:
+    class Meta:
 
-#         model = Ligne_commande
-#         fields = ['quantite','date_commande','commande']
-#         depth = 1
+        model = Ligne_commande
+        fields = ['quantite','date_commande','commande']
+        depth = 1
     
 
 
