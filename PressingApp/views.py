@@ -1,5 +1,7 @@
 from django.shortcuts import render,redirect
 from .models import *
+from math import inf, cos,asin, sqrt, pi
+
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -144,17 +146,24 @@ def tarifPachArticle(request):
 
 
 # GESTION DES API MOBIL
+# class AdresseClient(viewsets.ModelViewSet):
+#     serializer_class = AdressePretataire
+#     queryset = AdresseClient.objects.all()
 
-class AuthentificationViewSet(viewsets.ViewSet):
+
+
+class AuthentificationViewSet(viewsets.ModelViewSet):
     serializer_class = ClientSerializers
+    queryset = Client.objects.all()
 
     def get_queryset(self):
         client = Client.objects.all()
         return client
 
     def create(self, request, *args, **kwargs):
+    
         data_user = request.data
-        # if data_user:
+        
         newuser = User.objects.create(
             username = data_user["username"],
             first_name = data_user["first_name"],
@@ -163,6 +172,7 @@ class AuthentificationViewSet(viewsets.ViewSet):
         
         )
         newuser.save()
+    
         newclient = Client.objects.create(
             user = newuser,
             prenom = data_user["prenom"], 
@@ -171,18 +181,24 @@ class AuthentificationViewSet(viewsets.ViewSet):
         )
         newclient.save()
 
+        for adresse in data_user['adresse']:
+            adresse_obj = AdresseClient.objects.get(id = adresse["id"])
+            newclient.adresse.add(adresse_obj)
         serializer = ClientSerializers(newclient)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-        # else:
+        
+
+
+    # #     # else:
         #     return Response("username or Password is already exist")
 
         
     
-    def list(self,request):
-        clients = Client.objects.all()
-        serializer = ClientSerializers(clients, many = True)
-        return Response(serializer.data)
+    # def list(self,request):
+    #     clients = Client.objects.all()
+    #     serializer = ClientSerializers(clients, many = True)
+    #     return Response(serializer.data)
 
 
 #GENERIC VIEW API 
@@ -251,10 +267,13 @@ class PrestataireView(generics.ListCreateAPIView):
     
 
 class SearchView(generics.ListCreateAPIView):
+    
     search_fields = ['enseigne_juridique', 'adresse__ville','adresse__quartier','service__nom_service']
     filter_backends = (filters.SearchFilter,)
     queryset = Prestataire_Service.objects.all()
     serializer_class = PrestataireSerializer
+
+
 
 ## GESTIONS DES ARTICLES ##
 class ArticleViewSet(viewsets.ModelViewSet):
@@ -322,38 +341,111 @@ class CommandeViewSet(viewsets.ModelViewSet):
     serializer_class = CommandeSerializer
     queryset = Commande.objects.all()
 
-    # def post(self, request):
-    #     serializer =  CommandeSerializer()
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data, status=status.HTTP_201_CREATED )
-    #     else:
-    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    # def get_queryset(self):
-    #     commande =  Commande.objects.all()
-    #     return commande
     
-    # def create(self, request):
-    #     data_order = request.data
 
-    #     new_order = Commande.objects.create(
-    #         mode_paiement = data_order['mode_paiement'],
-    #         # status = data_order['status'],
-    #         # prestataire = data_order['prestataire'],
-    #         # client = data_order['client'],
-    #         )
+  
+    
+
+# def distance(self,latitude, longitude, latitude_presta, longitude_presta ):
+    #     p = pi/180
+    #     a = 0.5 - cos((latitude_presta-latitude)*p)/2 + cos(latitude*p) * cos(latitude_presta*p) * (1-cos((longitude_presta-longitude_client)*p))/2
+    #     return 12742 * asin(sqrt(a))
+
+
+## Vus sur les articles ##
+class PackArticleViewset(viewsets.ModelViewSet):
+    serializer_class = PackSerializer
+    queryset =  Pack_Article.objects.all()
+
+## Categorie Article ##
+class CategorieArticleViewset(viewsets.ModelViewSet):
+    serializer_class = CategorieArticleSerializer
+    queryset =  Pack_Article.objects.all()
+
+
+
+## GESTION DES TARIFICATION ##
+class TarificationViewSet(viewsets.ModelViewSet):
+    serializer_class =TarificationSerializer
+    queryset = Tarification.objects.all()
+
+## Gestion des  Prix de Pack ##
+
+class PrixPackViewSet(viewsets.ModelViewSet):
+    serializers_class  =  PrixPackSerializer
+    queryset = Prix_Pack.objects.all()
+
+
+## Gestion des Commentaires ##
+class NoteViewset(viewsets.ModelViewSet):
+    serializer_class = NoteSerializer
+    queryset = Note.objects.all()
+
+## GESTION DES FACTURES ##
+
+class FacturationViewset(viewsets.ModelViewSet):
+    serializer_class = FactureSerializer
+    
+    def get_queryset(self,request):
+        factures = Facture.objects.all()
+        return factures
+    
+    def create(self, request):
+        data_fac = request.data
+        numero_Facture =  datetime.datetime.now().timestamp()
+        newfacture = Facture.objects.create(
+            numero_Facture = numero_Facture ,
+            date_paiement = data_fac["data_paiement"],
+            commande = Commande.objects.get(id = data_fac['commande'])
+        )
+        newfacture.save()
+        serializer = FactureSerializer(newfacture)
+
+        return Response(serializer.data) 
+
+
+        # factures = Facture.objects.all()
+        # for facture in factures:
+        #     facture.numero_Facture = numero_Facture    
+
+
+
+
+
+## Gestion de Recherche en fonction de La distance ##
+class Recherche(APIView):
+    
+    def get(self, request):
+        prestataires = None
+        distances = inf
+        #1 recuperer la position du client qui fait la recherche
+        try:
+            client = Client.objects.get(id = request.GET(client = 'client.id'))
+            longitude = client.adresse.longitude
+            latitude = Client.adresse.latitude
+
+        except:
+            client = None
+            return Response("No customer please sign in")
+        try :
+            search_fields = ['enseigne_juridique', 'adresse__ville','adresse__quartier','service__nom_service']
+            filter_backends = (filters.SearchFilter,)
+            prestataire = Prestataire_Service.objects.all()
+            serializer = PrestataireSerializer(prestataire)
+        except :
+            searh_fields = []
+            return Response("No result!!!!")
         
-    #     new_order.save()
+        try:
+            for i in presataire:
+                longi = i.adresse.longitude
+                lati = i.adresse.latitude
+                p = pi/180
+                a = 0.5 - cos((longi-latitude)*p)/2 + cos(latitude*p) * cos(lati*p) * (1-cos((longi-longitude)*p))/2
+                distance = 12742 * asin(sqrt(a))
+                if distance > distaces:
+                    distances = distance
+                    prestataires = i.enseigne_juridique
+        except:
 
-    #     for client in data_order['client']:
-    #         client_obj = Client.objects.get(prenom=client['prenom'])
-    #         new_order.client.add(client_obj)
-
-    #     for prestataire in data_order['prestataire']:
-    #         prestataire_obj = Prestataire_Service.objects.get(enseigne_juridique = prestataire['enseigne_juridique'])
-    #         new_order.prestataire.add(prestataire_obj)
-
-    #     serializer = CommandeSerializer(new_order)
-    #     return Response(serializer.data)
-
-
+            return render("Nothing")

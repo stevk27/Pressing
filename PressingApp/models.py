@@ -2,7 +2,8 @@ from django.db import models
 # from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import User
 # Create your models here.
-
+from math import cos, asin, sqrt, pi
+import datetime
 
 # client 
 
@@ -45,14 +46,17 @@ class AdressePretataire(models.Model):
     ville = models.CharField(max_length = 100, null =  True, blank = True)
     quartier = models.CharField(max_length = 100, null = True , blank = True)
     Bp = models.CharField(max_length = 10, null = True , blank = True)  
-    longitude = models.DecimalField(max_digits=8, decimal_places=2)
-    latitude =  models.DecimalField(max_digits=8, decimal_places=2)
+    longitude_presta = models.DecimalField(max_digits=199, decimal_places=5)
+    latitude_presta =  models.DecimalField(max_digits=199, decimal_places=5)
    
     def __str__(self):
         return self.ville
     
-    def distance(self):
-        pass
+    # def distance(self,latitude_client, longitude_client, latitude_presta, longitude_presta ):
+    #     p = pi/180
+    #     a = 0.5 - cos((self.latitude_presta-latitude_client)*p)/2 + cos(latitude_client*p) * cos(latitude_presta*p) * (1-cos((longitude_presta-longitude_client)*p))/2
+    #     return 12742 * asin(sqrt(a))
+        
 
 
 
@@ -143,9 +147,6 @@ class Prix_Pack(models.Model):
     pack_article = models.ForeignKey(Pack_Article, on_delete = models.CASCADE, null = True, blank = True)
 
 
-
-
-
 class TypeLogistique(models.Model):
     nom_type = models.CharField(max_length = 100)
     caracteristique = models.TextField(max_length = 200)
@@ -184,7 +185,7 @@ class Prestataire_Service(models.Model):
     numero_imatriculation = models.CharField(max_length = 100, null = True, blank = True)
     telephone = models.CharField(max_length = 10, null = True , blank = True)
     adresse = models.ForeignKey(AdressePretataire, on_delete = models.CASCADE)
-    service = models.ForeignKey(Service, on_delete = models.CASCADE)
+    service = models.ManyToManyField(Service)
     logistique = models.ManyToManyField(Logistique,)
     nom_categorie = models.CharField(max_length = 100, blank = True, choices = Prestataire)
 
@@ -202,8 +203,12 @@ class Commande(models.Model):
     client = models.ForeignKey(Client, on_delete = models.CASCADE, null = True, blank = True)
     date_commande = models.DateTimeField(auto_now_add = True, null = True, blank = True )
     # status = models.BooleanField(default = False, blank = True )
-    prestataire = models.ManyToManyField(Prestataire_Service, through = 'Ligne_commande')
+
     mode_paiement = models.CharField(max_length = 100, null = True, blank = True, choices = Mode)
+    adresse_livraison =  models.ForeignKey(AdresseClient, on_delete = models.CASCADE, related_name = 'livraison' , null = True)
+    adresse_ramassage = models.ForeignKey(AdresseClient, on_delete = models.CASCADE , related_name = 'ramassage' ,null = True, blank = True)
+    tarification = models.ManyToManyField(Tarification, through = 'Ligne_commande')
+
 
 
 class Ligne_commande(models.Model):
@@ -211,13 +216,14 @@ class Ligne_commande(models.Model):
     date_commande = models.DateTimeField(auto_now_add = True, blank = True, null = True)
     commande = models.ForeignKey(Commande, on_delete = models.CASCADE, null = True, blank = True)
     prestataire = models.ForeignKey(Prestataire_Service, on_delete = models.CASCADE , null = True , blank = True)
-    
-
+    tarification = models.ForeignKey(Tarification, on_delete = models.CASCADE, null = True , blank = True)
+        
 
 class Facture(models.Model):
     commande = models.ForeignKey(Commande, on_delete = models.CASCADE, null = True, blank = True)
     numero_Facture = models.CharField(max_length = 12, unique = True)
     date_paiement = models.DateTimeField(auto_now_add = True, blank = True)
     
+
 
     
