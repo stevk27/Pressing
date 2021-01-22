@@ -20,19 +20,19 @@ router.register('categoriearticle', CategorieArticleViewset, basename = 'categor
 router.register('orderItem', LigneViewSet, basename = 'lignecommande')
 router.register('orderItem',PrixPackViewSet , basename = 'prixpack')
 router.register('facture',FacturationViewset , basename = 'facture')
-# router.register('prestataire', PrestataireView , basename = 'prestataire')
+router.register('prestataire', PrestataireView , basename = 'prestataire')
 
 
 urlpatterns = [
     path('',views.home, name = 'home'),
     path('registers', views.register, name ='register'),
     path('logins', views.loginClient, name = 'login'),
-    
+    path('prestaire', views.prestataire, name = ''),
 
      #url des API
     path('viewset/', include(router.urls)),
     path('login', LoginView.as_view()),
-    path('prestataire', PrestataireView.as_view()),
+    # path('prestataire', PrestataireView.as_view()),
     path('search',SearchView.as_view()),
     
 
@@ -44,3 +44,12 @@ urlpatterns = [
     path('registerclient', RegisterClientView.as_view()),
 
 ]
+
+
+
+
+
+
+
+
+

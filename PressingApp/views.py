@@ -97,12 +97,7 @@ def loginClient(request):
             return  render(request, 'commerce/login.html')
 
 
-    return render(request, 'login.html')
-
-## GESTION DU PRESTATAIRE ##
-def prestataire(request):
-    return render(request,'prestataire.html')
-
+    return render(request, 'authentification/login.html')
 
 # Gestion de la recherche  Des Prestataires de service
 
@@ -124,6 +119,22 @@ def searche(request):
     else:
         return render(request,'prestataire/home.html')
 
+## GESTION DU PRESTATAIRE ##
+def prestataire(request,pk):
+
+    prestataire = Prestataire_Service.objects.get(id = pk)
+    services = prestataire.service_set.all()
+    catalogue =  Tarification.objects.all()
+    catalogue_prestataire = prestataire.tarification
+    context = {
+        'prestatires':prestataire,
+        'services': services,
+        'catalogue_prestataire':catalogue_prestataire,
+
+    }
+
+    return render(request, 'dashbord/prestataire.html', context)
+
 
 ## GESTION DES COMMANDES CLIENTS ##
 
@@ -138,10 +149,43 @@ def procesOrder(request):
 
 ## GESTIONS DESARTICLES  ##
 def tarifArticle(request):
-    pass
 
-def tarifPachArticle(request):
-    pass
+    articles = ArticleForm()
+    service = ServiceForm()
+    tarification = TarificatioForm()
+
+    if request.method == "POST":
+        service = ServiceForm(request.POST)
+        articles = ArticleForm(request.POST)
+        tarification = TarificatioForm(request.POST)
+
+        if service.is_valid() and articles.is_valid() and tarification.is_valid():
+            articles.save()
+            service.save()
+            tarification.save(commit = False)
+
+            tarification.service = service
+            tarification.articel = articles
+
+            tarification.save()
+
+            return redirect('prestataire')
+        
+        else:
+            articles = ArticleForm()
+            service = ServiceForm()
+            tarification = TarificatioForm()
+            context = {
+                'tarification' : service,
+                'service': service,
+            }
+            return render(request,'tarification.html', context)
+
+    return  render(request, 'tarification.html', context)    
+    
+
+
+
 
 
 
@@ -261,10 +305,21 @@ class AdresseClientView(GenericAPIView):
 
 ## PRESTATAIRE ##
 
-class PrestataireView(generics.ListCreateAPIView):
+class PrestataireView(viewsets.ModelViewSet):
     queryset = Prestataire_Service.objects.all()
     serializer_class = PrestataireSerializer
     
+    def retrieve(self,request, *args, **kwargs):
+        params = kwargs
+        print(params['pk'])
+
+        presatataire = Prestataire_Service.objects.filter(
+            id = params['pk'],
+        )
+        serializer = PrestataireSerializer(presatataire, many = True)
+
+        return Response(serializer.data,)
+
 
 class SearchView(generics.ListCreateAPIView):
     
