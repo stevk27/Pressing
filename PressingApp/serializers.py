@@ -120,7 +120,7 @@ class PrestataireSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Prestataire_Service
-        fields = ['enseigne_juridique','numero_imatriculation','telephone','adresse','service','user']
+        fields = ['id','enseigne_juridique','numero_imatriculation','telephone','adresse','service','user']
         depth = 1
 
 
@@ -173,7 +173,7 @@ class FactureSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Facture
-        fields = ['numero_Facture','date_paiement','commande']
+        fields = ['id','numero_Facture','date_paiement','commande']
         depht = 1
     
         def validate(self, attrs):
