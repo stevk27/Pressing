@@ -38,6 +38,8 @@ from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
 from rest_framework.generics import GenericAPIView
 
+from .utils import *
+
 # # Create your views here.
 
 def home(request):
@@ -385,18 +387,18 @@ class NoteViewset(viewsets.ModelViewSet):
 
 class FacturationViewset(viewsets.ModelViewSet):
     serializer_class = FactureSerializer
+    queryset = Facture.objects.all()
     
-    def get_queryset(self,request):
+    def get_queryset(self):
         factures = Facture.objects.all()
         return factures
     
     def create(self, request):
         data_fac = request.data
-        numero_Facture =  datetime.datetime.now().timestamp()
+        numero_Facture = create_new_ref_number()
         newfacture = Facture.objects.create(
-            numero_Facture = numero_Facture ,
-            date_paiement = data_fac["data_paiement"],
-            commande = Commande.objects.get(id = data_fac['commande'])
+            numero_Facture=numero_Facture,
+            commande = Commande.objects.get(id=data_fac['commande'])
         )
         newfacture.save()
         serializer = FactureSerializer(newfacture)
@@ -417,7 +419,7 @@ class Recherche(APIView):
     
     def get(self, request):
         prestataires = None
-        distances = inf
+        distances = math.inf
         #1 recuperer la position du client qui fait la recherche
         try:
             client = Client.objects.get(id = request.GET(client = 'client.id'))
@@ -432,7 +434,7 @@ class Recherche(APIView):
             filter_backends = (filters.SearchFilter,)
             prestataire = Prestataire_Service.objects.all()
             serializer = PrestataireSerializer(prestataire)
-        except :
+        except :                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
             searh_fields = []
             return Response("No result!!!!")
         

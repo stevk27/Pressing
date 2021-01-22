@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 # Create your models here.
 from math import cos, asin, sqrt, pi
 import datetime
+from .utils import create_new_ref_number
 
 # client 
 
