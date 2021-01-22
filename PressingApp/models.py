@@ -6,6 +6,7 @@ from math import cos, asin, sqrt, pi
 import datetime
 from .utils import create_new_ref_number
 
+
 # client 
 
 class AdresseClient(models.Model):
@@ -47,8 +48,8 @@ class AdressePretataire(models.Model):
     ville = models.CharField(max_length = 100, null =  True, blank = True)
     quartier = models.CharField(max_length = 100, null = True , blank = True)
     Bp = models.CharField(max_length = 10, null = True , blank = True)  
-    longitude_presta = models.DecimalField(max_digits=199, decimal_places=5)
-    latitude_presta =  models.DecimalField(max_digits=199, decimal_places=5)
+    longitude_presta = models.DecimalField(max_digits=199, decimal_places=15)
+    latitude_presta =  models.DecimalField(max_digits=199, decimal_places=15)
    
     def __str__(self):
         return self.ville
@@ -191,7 +192,7 @@ class Prestataire_Service(models.Model):
     nom_categorie = models.CharField(max_length = 100, blank = True, choices = Prestataire)
 
     def __str__(self):
-        return self.enseigne_juridique
+        return str(self.enseigne_juridique)
     
 
 class Commande(models.Model):

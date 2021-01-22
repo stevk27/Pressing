@@ -1,6 +1,8 @@
 from django.shortcuts import render,redirect
 from .models import *
 from math import inf, cos,asin, sqrt, pi
+from django.db.models import Q
+
 
 
 from django.contrib import messages
@@ -36,9 +38,10 @@ import jwt
 
 from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView
 
 from .utils import *
+import googlemaps as gp
 
 # # Create your views here.
 
@@ -415,39 +418,59 @@ class FacturationViewset(viewsets.ModelViewSet):
 
 
 ## Gestion de Recherche en fonction de La distance ##
-class Recherche(APIView):
+class Recherche(ListAPIView):
+
+    serializer_class = PrestataireSerializer
+    queryset = Prestataire_Service.objects.all()
     
     def get(self, request):
+
         prestataires = None
-        distances = math.inf
+        distance = math.inf
         #1 recuperer la position du client qui fait la recherche
         try:
-            client = Client.objects.get(id = request.GET(client = 'client.id'))
-            longitude = client.adresse.longitude
-            latitude = Client.adresse.latitude
-
+            c_longitude = request.GET['longitude']
         except:
-            client = None
-            return Response("No customer please sign in")
-        try :
-            search_fields = ['enseigne_juridique', 'adresse__ville','adresse__quartier','service__nom_service']
-            filter_backends = (filters.SearchFilter,)
-            prestataire = Prestataire_Service.objects.all()
-            serializer = PrestataireSerializer(prestataire)
-        except :                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
-            searh_fields = []
-            return Response("No result!!!!")
+            return Response({"error":"Vous n'avez pas envoyer de longitude"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            c_latitude = request.GET['latitude']
+        except:
+            return Response({"error":"Vous n'avez pas envoyer de lattude"}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            for i in presataire:
-                longi = i.adresse.longitude
-                lati = i.adresse.latitude
-                p = pi/180
-                a = 0.5 - cos((longi-latitude)*p)/2 + cos(latitude*p) * cos(lati*p) * (1-cos((longi-longitude)*p))/2
-                distance = 12742 * asin(sqrt(a))
-                if distance > distaces:
-                    distances = distance
-                    prestataires = i.enseigne_juridique
+            query = request.GET['query']
         except:
+            return Response({"error":"Vous n'avez pas envoyer de requete"}, status=status.HTTP_400_BAD_REQUEST)
+            
 
-            return render("Nothing")
+        gpClient = gp.Client(key='AIzaSyBej_-JrIkgpsoA-oFGXf8JHO9dOKBCkX4')
+
+
+        prestataires = Prestataire_Service.objects.filter(
+            Q(enseigne_juridique=query) | Q(nom_categorie=query) | Q(numero_imatriculation=query)
+        )
+
+        print(prestataires)
+
+        if len(prestataires) == 0:
+            return Response({"message":"Search query didn't match"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            prox_prestatiare = Prestataire_Service()
+            for prestataire in prestataires:
+                
+                lon = prestataire.adresse.longitude_presta
+                lat = prestataire.adresse.latitude_presta
+                dist = gpClient.distance_matrix(origins=[(lat,lon)],destinations=[(c_latitude,c_longitude)])
+                print(dist)
+                dist = dist['rows'][0]['elements'][0]['distance']['value']
+                if distance > dist:
+                    distance = dist 
+                    prox_prestatiare = prestataire
+
+            print(prox_prestatiare)
+            serializer = PrestataireSerializer(prox_prestatiare)
+
+            return Response(serializer.data)
+
+
+
