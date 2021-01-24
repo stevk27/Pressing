@@ -326,15 +326,6 @@ class PrestataireView(viewsets.ModelViewSet):
         return Response(serializer.data,)
 
 
-class SearchView(generics.ListCreateAPIView):
-    
-    search_fields = ['enseigne_juridique', 'adresse__ville','adresse__quartier','service__nom_service']
-    filter_backends = (filters.SearchFilter,)
-    queryset = Prestataire_Service.objects.all()
-    serializer_class = PrestataireSerializer
-
-
-
 ## GESTIONS DES ARTICLES ##
 class ArticleViewSet(viewsets.ModelViewSet):
     serializer_class = ArticleSerializer
@@ -463,12 +454,14 @@ class FacturationViewset(viewsets.ModelViewSet):
 
         return Response(serializer.data) 
 
+##RECHERCHE##
 
-        # factures = Facture.objects.all()
-        # for facture in factures:
-        #     facture.numero_Facture = numero_Facture    
-
-
+class SearchView(generics.ListCreateAPIView):
+    
+    search_fields = ['enseigne_juridique', 'adresse__ville','adresse__quartier','service__nom_service']
+    filter_backends = (filters.SearchFilter,)
+    queryset = Prestataire_Service.objects.all()
+    serializer_class = PrestataireSerializer
 
 
 

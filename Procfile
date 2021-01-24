@@ -1,0 +1,1 @@
+web : gunicorn Pressing.wsgi --log-file-

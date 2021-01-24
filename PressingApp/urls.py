@@ -1,5 +1,5 @@
 from django.urls import path,include
-from. import views
+from . import views
 from django.urls import path,include
 from. import views
 from .views import  *
@@ -34,7 +34,7 @@ urlpatterns = [
     path('login', LoginView.as_view()),
     # path('prestataire', PrestataireView.as_view()),
     path('search',SearchView.as_view()),
-    path('search_dist',Recherche.as_view()),
+    # path('search_dist',Recherche.as_view()),
     
 
     #use the djoser
