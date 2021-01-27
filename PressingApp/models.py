@@ -211,6 +211,20 @@ class Commande(models.Model):
     adresse_ramassage = models.ForeignKey(AdresseClient, on_delete = models.CASCADE , related_name = 'ramassage' ,null = True, blank = True)
     tarification = models.ManyToManyField(Tarification, through = 'Ligne_commande')
 
+    #montant total
+    @property
+    def total_price(self):
+        orderItem = self.tarification_set.all()
+        total = sum(article.prix_article for article in orderItem)
+        return total 
+
+    #quantite total
+    @property
+    def quantite_total(self):
+        orderItem = self.tarification_set.all()
+        total = sum(article.quantite for article in orderItem)
+        return total
+
 
 
 class Ligne_commande(models.Model):
@@ -219,13 +233,24 @@ class Ligne_commande(models.Model):
     commande = models.ForeignKey(Commande, on_delete = models.CASCADE, null = True, blank = True)
     prestataire = models.ForeignKey(Prestataire_Service, on_delete = models.CASCADE , null = True , blank = True)
     tarification = models.ForeignKey(Tarification, on_delete = models.CASCADE, null = True , blank = True)
-        
+
+    @property
+    def prix_article(self):
+        price = self.quantite*self.tarification.prix
+        return price
+
+
+        pass
+
+
+
 
 class Facture(models.Model):
     commande = models.ForeignKey(Commande, on_delete = models.CASCADE, null = True, blank = True)
     numero_Facture = models.CharField(max_length = 12, unique = True)
     date_paiement = models.DateTimeField(auto_now_add = True, blank = True)
-    
+        
+
 
 
     

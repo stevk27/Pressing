@@ -49,11 +49,14 @@ class TarificatioForm(ModelForm):
         model = Tarification
         fields = ('__all__')
 
+
+
 class PrixPackForm(ModelForm):
 
     class Meta:
         model = Prix_Pack
         fields = ('__all__')
+
 
 class ArticleForm(ModelForm):
     class Meta:

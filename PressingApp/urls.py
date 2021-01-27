@@ -21,10 +21,12 @@ router.register('orderItem', LigneViewSet, basename = 'lignecommande')
 router.register('orderItem',PrixPackViewSet , basename = 'prixpack')
 router.register('facture',FacturationViewset , basename = 'facture')
 router.register('prestataire', PrestataireView , basename = 'prestataire')
+router.register('tarification', TarifiViewset , basename = 'tarif')
 
 
 urlpatterns = [
     path('',views.home, name = 'home'),
+    # path('tarification', TarifiViewset.as_view(), name = 'tarification'),
     path('registers', views.register, name ='register'),
     path('logins', views.loginClient, name = 'login'),
     path('prestaire', views.prestataire, name = ''),

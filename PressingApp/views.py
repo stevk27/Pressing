@@ -314,16 +314,16 @@ class PrestataireView(viewsets.ModelViewSet):
     queryset = Prestataire_Service.objects.all()
     serializer_class = PrestataireSerializer
     
-    def retrieve(self,request, *args, **kwargs):
-        params = kwargs
-        print(params['pk'])
+    # def retrieve(self,request, *args, **kwargs):
+    #     params = kwargs
+    #     print(params['pk'])
 
-        presatataire = Prestataire_Service.objects.filter(
-            id = params['pk'],
-        )
-        serializer = PrestataireSerializer(presatataire, many = True)
+    #     presatataire = Prestataire_Service.objects.filter(
+    #         id = params['pk'],
+    #     )
+    #     serializer = PrestataireSerializer(presatataire, many = True)
 
-        return Response(serializer.data,)
+    #     return Response(serializer.data,)
 
 
 ## GESTIONS DES ARTICLES ##
@@ -337,8 +337,8 @@ class ArticleViewSet(viewsets.ModelViewSet):
 
 class ServiceViewSet(viewsets.ModelViewSet):
     serializer_class = ServiceSerializer
-
     queryset = Service.objects.all()
+
 
 ## GESTION DES COMMANDES ET LIGNE DE COMMANDE  ##
 class LigneCommandeView(GenericAPIView):
@@ -346,7 +346,6 @@ class LigneCommandeView(GenericAPIView):
 
     def get_queryset(self):
         ligne_commande = Ligne_commande.objects.all()
-
         return ligne_commande
 
     # def create(self, request,*args, **kwargs):
@@ -393,10 +392,6 @@ class CommandeViewSet(viewsets.ModelViewSet):
     queryset = Commande.objects.all()
 
     
-
-  
-    
-
 # def distance(self,latitude, longitude, latitude_presta, longitude_presta ):
     #     p = pi/180
     #     a = 0.5 - cos((latitude_presta-latitude)*p)/2 + cos(latitude*p) * cos(latitude_presta*p) * (1-cos((longitude_presta-longitude_client)*p))/2
@@ -419,6 +414,20 @@ class CategorieArticleViewset(viewsets.ModelViewSet):
 class TarificationViewSet(viewsets.ModelViewSet):
     serializer_class =TarificationSerializer
     queryset = Tarification.objects.all()
+
+    def get(self, request, *arg, **kwargs):
+        params = kwargs
+
+        prestataire = request.GET(id = params['pk'])
+        services= request.GET(id = params['id'])
+
+        if prestataire.service.id == services.id:
+            tarification = services.tarification_set.all()
+            serializer = TarificationSerializer(tarification)
+            return Response(serializer.data)
+        else:
+            return Response('no tarificationexist for this office')
+    
 
 ## Gestion des  Prix de Pack ##
 
@@ -520,5 +529,44 @@ class Recherche(ListAPIView):
 
             return Response(serializer.data)
 
+class TarifiViewset(viewsets.ModelViewSet):
+
+    serializer_class =TarificationSerializer
+    queryset = Tarification.objects.all()
+
+    def get(self, request, *arg, **kwargs):
+        print('testttt')
+        params = kwargs
+        print(params['pk'])
+        try:
+            # prestataire = request.GET['idPrestataire']
+            prestataire = self.request.query_params.get('idprestataire')
+        except:
+            return Response('please correct your keys or your id isn''not correct')
+        try:    
+            # services= request.GET['idService']
+            services = self.request.query_params.get('idservice')
+        except:
+           return Response('please correct your keys or your id isn''not correct')
+
+        try:
+            prestataire = Prestataire_Service.objects.get(id=prestataire)
+        except:
+            return Response('prestataire doesn''t exist')
+
+        try:
+            service = Service.objects.get(id=services)
+        except:
+            return Response('service doesn''t exist')
+
+        services = prestataire.service
+
+        if service in services:
+            tarification = service.tarification__set.all()
+            serializer = TarificationSerializer(tarification)
+            return Response(serializer.data)
+        
+        else:
+            return Response('Not Tarification')
 
 
