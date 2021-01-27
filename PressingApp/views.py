@@ -504,7 +504,7 @@ class Recherche(ListAPIView):
 
 
         prestataires = Prestataire_Service.objects.filter(
-            Q(enseigne_juridique=query) | Q(nom_categorie=query) | Q(numero_imatriculation=query)
+            Q(enseigne_juridique=query) | Q(nom_categorie=query) | Q(adresse__quartier=query) | Q(adresse__ville=query)
         )
 
         print(prestataires)
@@ -526,8 +526,8 @@ class Recherche(ListAPIView):
 
             print(prox_prestatiare)
             serializer = PrestataireSerializer(prox_prestatiare)
-
-            return Response(serializer.data)
+            prestataire = PrestataireSerializer(prestataires)
+            return Response(serializer.data, prestataire.data)
 
 class TarifiViewset(viewsets.ModelViewSet):
 
